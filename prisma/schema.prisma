@@ -106,3 +106,9 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+// model Category {
+//   id          String  @id @default(cuid())
+//   value       String
+//   description String?
+// }
