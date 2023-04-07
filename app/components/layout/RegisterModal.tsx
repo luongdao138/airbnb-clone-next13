@@ -20,6 +20,7 @@ import { getInputVariant, handleError } from "@/app/utils/error";
 import Button from "../common/Button";
 import { FcGoogle } from "react-icons/fc";
 import { AiFillGithub } from "react-icons/ai";
+import { signIn } from "next-auth/react";
 
 interface RegisterModalProps {}
 
@@ -90,13 +91,25 @@ interface FooterContentProps {
 }
 
 const FooterContent = ({ closeRegisterModal }: FooterContentProps) => {
+  const handleGithubSignIn = () => {
+    signIn("github");
+  };
+
+  const handleGoogleSignIn = () => {
+    signIn("google");
+  };
+
   return (
     <div className="flex flex-col gap-4 mt-3">
       <hr />
-      <Button onClick={() => {}} variant="outlined" icon={FcGoogle}>
+      <Button onClick={handleGoogleSignIn} variant="outlined" icon={FcGoogle}>
         Google
       </Button>
-      <Button onClick={() => {}} variant="outlined" icon={AiFillGithub}>
+      <Button
+        onClick={handleGithubSignIn}
+        variant="outlined"
+        icon={AiFillGithub}
+      >
         Github
       </Button>
 
@@ -152,7 +165,14 @@ const RegisterModal: FC<RegisterModalProps> = ({}) => {
       actionLabel="Continue"
       onClose={authStore.closeRegisterModal}
       onSubmit={handleSubmit(onSubmit)}
-      footer={<FooterContent closeRegisterModal={authStore.closeLoginModal} />}
+      footer={
+        <FooterContent
+          closeRegisterModal={() => {
+            authStore.closeRegisterModal();
+            authStore.openLoginModal();
+          }}
+        />
+      }
     >
       <BodyContent control={control} errors={errors} />
     </Modal>

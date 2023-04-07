@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { FC, forwardRef, HTMLAttributes } from "react";
+import { FC, forwardRef, ImgHTMLAttributes } from "react";
 
-interface AvatarProps extends HTMLAttributes<HTMLImageElement> {}
+interface AvatarProps extends ImgHTMLAttributes<HTMLImageElement> {}
 
 const Avatar: FC<AvatarProps> = forwardRef<HTMLImageElement, AvatarProps>(
-  ({ placeholder, ...props }, ref) => {
+  ({ placeholder, src, ...props }, ref) => {
     return (
       <Image
         {...props}
@@ -15,7 +15,7 @@ const Avatar: FC<AvatarProps> = forwardRef<HTMLImageElement, AvatarProps>(
         width={30}
         height={30}
         alt="avatar"
-        src="/images/placeholder.jpg"
+        src={src || "/images/placeholder.jpg"}
       />
     );
   }

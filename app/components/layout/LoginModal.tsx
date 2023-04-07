@@ -80,24 +80,36 @@ interface FooterContentProps {
 }
 
 const FooterContent = ({ closeLoginModal }: FooterContentProps) => {
+  const handleGithubSignIn = () => {
+    signIn("github");
+  };
+
+  const handleGoogleSignIn = () => {
+    signIn("google");
+  };
+
   return (
     <div className="flex flex-col gap-4 mt-3">
       <hr />
-      <Button onClick={() => {}} variant="outlined" icon={FcGoogle}>
+      <Button onClick={handleGoogleSignIn} variant="outlined" icon={FcGoogle}>
         Google
       </Button>
-      <Button onClick={() => {}} variant="outlined" icon={AiFillGithub}>
+      <Button
+        onClick={handleGithubSignIn}
+        variant="outlined"
+        icon={AiFillGithub}
+      >
         Github
       </Button>
 
       <div className="text-neutral-500 text-center mt-4 font-light">
         <div className="flex items-center justify-center gap-2">
-          <div>Already have an account</div>
+          <div>Not have account?</div>
           <div
             onClick={closeLoginModal}
             className="text-neutral-800 cursor-pointer hover:underline"
           >
-            Login
+            Register
           </div>
         </div>
       </div>
@@ -158,7 +170,14 @@ const LoginModal: FC<LoginModalProps> = ({}) => {
       actionLabel="Continue"
       onClose={authStore.closeLoginModal}
       onSubmit={handleSubmit(onSubmit)}
-      footer={<FooterContent closeLoginModal={authStore.closeLoginModal} />}
+      footer={
+        <FooterContent
+          closeLoginModal={() => {
+            authStore.closeLoginModal();
+            authStore.openRegisterModal();
+          }}
+        />
+      }
     >
       <BodyContent control={control} errors={errors} />
     </Modal>
