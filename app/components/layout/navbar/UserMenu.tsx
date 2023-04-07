@@ -6,12 +6,17 @@ import Avatar from "../../common/Avatar";
 import { useToggle } from "@/app/utils/hooks/useToggle";
 import MenuItem from "./MenuItem";
 import { useAuthStore } from "@/app/zustand/authStore";
+import { signOut } from "next-auth/react";
 
 interface UserMenuProps {}
 
 const UserMenu: FC<UserMenuProps> = ({}) => {
-  const authStore = useAuthStore();
+  const { user, openLoginModal, openRegisterModal } = useAuthStore();
   const { state: isOpenMenu, toggle: toggleOpenMenu } = useToggle();
+
+  const handleLogout = () => {
+    signOut();
+  };
 
   return (
     <div className="relative">
@@ -37,10 +42,21 @@ const UserMenu: FC<UserMenuProps> = ({}) => {
       {isOpenMenu && (
         <div className="absolute rounded-xl shadow-md w-[40vw] md:w-3/4 bg-white overflow-hidden right-0 top-12 text-sm">
           <div className="flex flex-col cursor-pointer">
-            <>
-              <MenuItem label={"Login"} onClick={() => {}} />
-              <MenuItem label={"Register"} onClick={authStore.openAuthModal} />
-            </>
+            {user ? (
+              <>
+                <MenuItem label={"My trips"} onClick={() => {}} />
+                <MenuItem label={"My favorites"} onClick={() => {}} />
+                <MenuItem label={"My reservations"} onClick={() => {}} />
+                <MenuItem label={"My reservations"} onClick={() => {}} />
+                <MenuItem label={"Airbnb my home"} onClick={() => {}} />
+                <MenuItem label={"Logout"} onClick={handleLogout} />
+              </>
+            ) : (
+              <>
+                <MenuItem label={"Login"} onClick={openLoginModal} />
+                <MenuItem label={"Register"} onClick={openRegisterModal} />
+              </>
+            )}
           </div>
         </div>
       )}

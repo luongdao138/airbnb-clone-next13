@@ -1,0 +1,10 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:14
+    ports:
+      - "5433:5432" # host:container
+    environment:
+      POSTGRES_USER: luongdao
+      POSTGRES_PASSWORD: 1234567@
+      POSTGRES_DB: airbnb-clone

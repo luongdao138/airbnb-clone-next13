@@ -1,7 +1,9 @@
 "use client";
 
-import { register } from "@/app/services/auth";
+import { getInputVariant, handleError } from "@/app/utils/error";
+import { registerValidator } from "@/app/utils/validators/auth";
 import { useAuthStore } from "@/app/zustand/authStore";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { FC } from "react";
 import {
   Control,
@@ -10,40 +12,40 @@ import {
   SubmitHandler,
   useForm,
 } from "react-hook-form";
+import { AiFillGithub } from "react-icons/ai";
+import { FcGoogle } from "react-icons/fc";
 import { useMutation } from "react-query";
+import Button from "../common/Button";
 import Input from "../common/form/Input";
 import Heading from "../common/Heading";
 import Modal from "../common/modal/Modal";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { registerValidator } from "@/app/utils/validators/auth";
-import { getInputVariant, handleError } from "@/app/utils/error";
-import Button from "../common/Button";
-import { FcGoogle } from "react-icons/fc";
-import { AiFillGithub } from "react-icons/ai";
+import { signIn } from "next-auth/react";
+import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
-interface RegisterModalProps {}
+const loginValidator = registerValidator.omit({ username: true });
 
-interface RegisterFormState {
+interface LoginModalProps {}
+
+interface LoginFormState {
   email: string;
-  username: string;
   password: string;
 }
 
-const defaultValues: RegisterFormState = {
+const defaultValues: LoginFormState = {
   email: "",
   password: "",
-  username: "",
 };
 
 interface BodyContentProps {
-  control: Control<RegisterFormState, any>;
-  errors: FieldErrors<RegisterFormState>;
+  control: Control<LoginFormState, any>;
+  errors: FieldErrors<LoginFormState>;
 }
 
 const BodyContent = ({ control, errors }: BodyContentProps) => {
   return (
     <div className="flex flex-col gap-4">
-      <Heading title="Welcome to Airbnb" subtitle="Create an account!" />
+      <Heading title="Welcome back" subtitle="Login to your account!" />
 
       <Controller
         control={control}
@@ -52,18 +54,6 @@ const BodyContent = ({ control, errors }: BodyContentProps) => {
           <Input
             {...field}
             placeholder="Email"
-            variant={getInputVariant(errors, "email")}
-          />
-        )}
-      />
-
-      <Controller
-        control={control}
-        name="username"
-        render={({ field }) => (
-          <Input
-            {...field}
-            placeholder="Username"
             variant={getInputVariant(errors, "email")}
           />
         )}
@@ -86,10 +76,10 @@ const BodyContent = ({ control, errors }: BodyContentProps) => {
 };
 
 interface FooterContentProps {
-  closeRegisterModal: () => void;
+  closeLoginModal: () => void;
 }
 
-const FooterContent = ({ closeRegisterModal }: FooterContentProps) => {
+const FooterContent = ({ closeLoginModal }: FooterContentProps) => {
   return (
     <div className="flex flex-col gap-4 mt-3">
       <hr />
@@ -104,7 +94,7 @@ const FooterContent = ({ closeRegisterModal }: FooterContentProps) => {
         <div className="flex items-center justify-center gap-2">
           <div>Already have an account</div>
           <div
-            onClick={closeRegisterModal}
+            onClick={closeLoginModal}
             className="text-neutral-800 cursor-pointer hover:underline"
           >
             Login
@@ -115,31 +105,47 @@ const FooterContent = ({ closeRegisterModal }: FooterContentProps) => {
   );
 };
 
-const RegisterModal: FC<RegisterModalProps> = ({}) => {
+const LoginModal: FC<LoginModalProps> = ({}) => {
+  const router = useRouter();
   const authStore = useAuthStore();
-  const { mutate, isLoading } = useMutation(register, {
-    onSuccess() {
-      authStore.closeRegisterModal();
-    },
-    onError(error) {
-      handleError(error);
-    },
-  });
+  const { mutate, isLoading } = useMutation(
+    (params: LoginFormState) =>
+      signIn("credentials", { ...params, redirect: false }),
+    {
+      onSuccess(data) {
+        if (data?.ok) {
+          toast.success("Logged in success!");
+          router.refresh();
+          authStore.closeLoginModal();
+          return;
+        }
+
+        if (data?.error) {
+          toast.error(data.error);
+        }
+      },
+      onError(error) {
+        handleError(error);
+      },
+    }
+  );
 
   const {
     control,
     reset,
     formState: { errors },
     handleSubmit,
-  } = useForm<RegisterFormState>({
+  } = useForm<LoginFormState>({
     defaultValues,
-    resolver: zodResolver(registerValidator),
+    resolver: zodResolver(loginValidator),
   });
 
-  const onSubmit: SubmitHandler<RegisterFormState> = (data) => {
+  const onSubmit: SubmitHandler<LoginFormState> = (data) => {
     mutate(data, {
-      onSuccess() {
-        reset();
+      onSuccess(data) {
+        if (data?.ok) {
+          reset();
+        }
       },
     });
   };
@@ -147,16 +153,16 @@ const RegisterModal: FC<RegisterModalProps> = ({}) => {
   return (
     <Modal
       disabled={isLoading}
-      isOpen={authStore.isOpenRegisterModal}
-      title="Register"
+      isOpen={authStore.isOpenLoginModal}
+      title="Login"
       actionLabel="Continue"
-      onClose={authStore.closeRegisterModal}
+      onClose={authStore.closeLoginModal}
       onSubmit={handleSubmit(onSubmit)}
-      footer={<FooterContent closeRegisterModal={authStore.closeLoginModal} />}
+      footer={<FooterContent closeLoginModal={authStore.closeLoginModal} />}
     >
       <BodyContent control={control} errors={errors} />
     </Modal>
   );
 };
 
-export default RegisterModal;
+export default LoginModal;

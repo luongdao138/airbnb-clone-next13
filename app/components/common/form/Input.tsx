@@ -3,7 +3,7 @@
 import { merge } from "@/app/utils/tailwind-merge";
 import { cva, VariantProps } from "class-variance-authority";
 import clsx from "clsx";
-import { FC, forwardRef, HTMLAttributes, InputHTMLAttributes } from "react";
+import { FC, forwardRef, InputHTMLAttributes } from "react";
 import { BiDollar } from "react-icons/bi";
 
 const inputProps = cva(

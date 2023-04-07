@@ -2,7 +2,7 @@
 
 import { merge } from "@/app/utils/tailwind-merge";
 import { cva, VariantProps } from "class-variance-authority";
-import { ButtonHTMLAttributes, FC, forwardRef, HTMLAttributes } from "react";
+import { ButtonHTMLAttributes, FC, forwardRef } from "react";
 import type { IconType } from "react-icons";
 
 const buttonProps = cva(
@@ -38,9 +38,13 @@ interface ButtonProps
 }
 
 const Button: FC<ButtonProps> = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ children, disabled, className, variant, size, icon: Icon, ...props }) => {
+  (
+    { children, disabled, className, variant, size, icon: Icon, ...props },
+    ref
+  ) => {
     return (
       <button
+        ref={ref}
         disabled={Boolean(disabled)}
         className={merge(className, buttonProps({ variant, size }))}
         {...props}

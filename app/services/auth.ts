@@ -1,6 +1,6 @@
 import { client } from "./client";
 
-interface RegisterInput {
+export interface RegisterInput {
   email: string;
   username: string;
   password: string;
