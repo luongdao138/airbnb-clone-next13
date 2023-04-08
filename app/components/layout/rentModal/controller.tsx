@@ -1,10 +1,14 @@
 "use client";
 
+import { rentFormValidator } from "@/app/utils/validators/rent";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { createContext, useCallback, useContext, useState } from "react";
 import {
   Control,
   FieldErrors,
+  FieldPath,
   SetValueConfig,
+  SubmitHandler,
   useForm,
   UseFormReset,
   UseFormSetValue,
@@ -65,10 +69,15 @@ const defaultFormValues: RentFormState = {
   description: "",
   guestCount: 1,
   imageSrc: "",
-  location: null,
+  location: "",
   roomCount: 1,
   price: 1,
   title: "",
+};
+
+const validationMap: { [key: number]: FieldPath<RentFormState>[] } = {
+  [RentSteps.CATEGORY]: ["category"],
+  [RentSteps.LOCATION]: ["location"],
 };
 
 const RentContext = createContext<RentContextState>({} as RentContextState);
@@ -82,7 +91,12 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     setValue,
     formState: { errors },
     reset,
-  } = useForm<RentFormState>({ defaultValues: defaultFormValues });
+    trigger,
+    getValues,
+  } = useForm<RentFormState>({
+    defaultValues: defaultFormValues,
+    resolver: zodResolver(rentFormValidator),
+  });
 
   const customSetValue: UseFormSetValue<RentFormState> = useCallback(
     (name, value: any, options?: SetValueConfig) => {
@@ -114,13 +128,31 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const handleSubmitRentForm = () => {
+  const onSubmit: SubmitHandler<RentFormState> = (data) => {
+    console.log(data);
+  };
+
+  async function checkStepValid(step: RentSteps): Promise<boolean> {
+    const keyToChecks = validationMap[step];
+    if (!keyToChecks) return true;
+
+    return await trigger(validationMap[step]);
+  }
+
+  const handleSubmitRentForm = async () => {
     if (currentStep !== maxStep) {
-      moveForward();
+      const isStepValid = await checkStepValid(currentStep);
+      isStepValid && moveForward();
       return;
     }
 
+    // trigger form validation
+    const isValid = await trigger();
+
     // submit form right here
+    if (isValid) {
+      onSubmit(getValues());
+    }
   };
 
   return (

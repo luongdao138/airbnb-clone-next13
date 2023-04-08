@@ -8,6 +8,8 @@ import { RentSteps, useRentContext } from "./controller";
 import LocationStep from "./steps/LocationStep";
 import InfoStep from "./steps/InfoStep";
 import ImagesStep from "./steps/ImagesStep";
+import DescriptionStep from "./steps/DescriptionStep";
+import PriceStep from "./steps/PriceStep";
 
 interface RentModalProps {}
 
@@ -43,8 +45,15 @@ const RentModal: FC<RentModalProps> = ({}) => {
 
       case RentSteps.INFO:
         return <InfoStep />;
+
       case RentSteps.IMAGES:
         return <ImagesStep />;
+
+      case RentSteps.DESCRIPTION:
+        return <DescriptionStep />;
+
+      case RentSteps.PRICE:
+         return <PriceStep/>
 
       default:
         return <></>;
