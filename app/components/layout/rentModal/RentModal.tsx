@@ -6,6 +6,8 @@ import Modal from "../../common/modal/Modal";
 import CategoryStep from "./steps/CategoryStep";
 import { RentSteps, useRentContext } from "./controller";
 import LocationStep from "./steps/LocationStep";
+import InfoStep from "./steps/InfoStep";
+import ImagesStep from "./steps/ImagesStep";
 
 interface RentModalProps {}
 
@@ -38,6 +40,11 @@ const RentModal: FC<RentModalProps> = ({}) => {
 
       case RentSteps.LOCATION:
         return <LocationStep />;
+
+      case RentSteps.INFO:
+        return <InfoStep />;
+      case RentSteps.IMAGES:
+        return <ImagesStep />;
 
       default:
         return <></>;
