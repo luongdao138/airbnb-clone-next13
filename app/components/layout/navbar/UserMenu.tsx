@@ -7,10 +7,12 @@ import { useToggle } from "@/app/utils/hooks/useToggle";
 import MenuItem from "./MenuItem";
 import { useAuthStore } from "@/app/zustand/authStore";
 import { signOut } from "next-auth/react";
+import { useRentStore } from "@/app/zustand/rentStore";
 
 interface UserMenuProps {}
 
 const UserMenu: FC<UserMenuProps> = ({}) => {
+  const { openRentModal } = useRentStore();
   const { user, openLoginModal, openRegisterModal } = useAuthStore();
   const { state: isOpenMenu, toggle: toggleOpenMenu } = useToggle();
 
@@ -18,11 +20,18 @@ const UserMenu: FC<UserMenuProps> = ({}) => {
     signOut();
   };
 
+  const onRent = () => {
+    if (!user) return openLoginModal();
+
+    // TODO: open rent modal
+    openRentModal();
+  };
+
   return (
     <div className="relative">
       <div className="flex flex-row items-center gap-3">
         <div
-          onClick={() => {}}
+          onClick={onRent}
           className="hidden md:block text-sm font-semibold py-3 px-4 rounded-full hover:bg-neutral-100 transition cursor-pointer"
         >
           Airbnb your home
@@ -48,7 +57,7 @@ const UserMenu: FC<UserMenuProps> = ({}) => {
                 <MenuItem label={"My favorites"} onClick={() => {}} />
                 <MenuItem label={"My reservations"} onClick={() => {}} />
                 <MenuItem label={"My reservations"} onClick={() => {}} />
-                <MenuItem label={"Airbnb my home"} onClick={() => {}} />
+                <MenuItem label={"Airbnb my home"} onClick={openRentModal} />
                 <MenuItem label={"Logout"} onClick={handleLogout} />
               </>
             ) : (

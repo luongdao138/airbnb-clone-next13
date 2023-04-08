@@ -6,7 +6,7 @@ declare global {
 }
 
 const client =
-  globalThis.prisma ||
+  globalThis?.prisma ||
   new PrismaClient({
     log: ["query", "error", "info", "warn"],
     errorFormat: __is_prod__ ? "minimal" : "pretty",
