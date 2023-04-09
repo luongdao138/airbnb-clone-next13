@@ -8,7 +8,7 @@ import { useRentContext } from "../controller";
 interface PriceStepProps {}
 
 const PriceStep: FC<PriceStepProps> = ({}) => {
-  const { formController } = useRentContext();
+  const { formController, isSubmitting } = useRentContext();
 
   return (
     <div className="flex flex-col gap-8">
@@ -24,8 +24,10 @@ const PriceStep: FC<PriceStepProps> = ({}) => {
           <Input
             {...field}
             type="number"
+            disabled={isSubmitting}
             format="price"
             placeholder="Price"
+            min={0}
             variant={getInputVariant(formController.errors, "price")}
           />
         )}

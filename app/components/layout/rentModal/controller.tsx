@@ -1,7 +1,11 @@
 "use client";
 
+import { createListing, CreateListingReq } from "@/app/services/rent";
+import { handleError } from "@/app/utils/error";
 import { rentFormValidator } from "@/app/utils/validators/rent";
+import { useRentStore } from "@/app/zustand/rentStore";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useState } from "react";
 import {
   Control,
@@ -14,6 +18,8 @@ import {
   UseFormSetValue,
   UseFormWatch,
 } from "react-hook-form";
+import { toast } from "react-hot-toast";
+import { useMutation } from "react-query";
 
 export enum RentSteps {
   CATEGORY = 0,
@@ -49,6 +55,7 @@ interface RentContextState {
     reset: UseFormReset<RentFormState>;
     onSubmit: () => void;
   };
+  isSubmitting: boolean;
 }
 
 export interface RentFormState {
@@ -78,11 +85,18 @@ const defaultFormValues: RentFormState = {
 const validationMap: { [key: number]: FieldPath<RentFormState>[] } = {
   [RentSteps.CATEGORY]: ["category"],
   [RentSteps.LOCATION]: ["location"],
+  [RentSteps.IMAGES]: ["imageSrc"],
+  [RentSteps.DESCRIPTION]: ["title", "description"],
+  [RentSteps.PRICE]: ["price"],
 };
 
 const RentContext = createContext<RentContextState>({} as RentContextState);
 
 export default function Provider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const { closeRentModal } = useRentStore((state) => ({
+    closeRentModal: state.closeRentModal,
+  }));
   const [currentStep, setCurrentStep] = useState<RentSteps>(RentSteps.CATEGORY);
 
   const {
@@ -96,6 +110,18 @@ export default function Provider({ children }: { children: React.ReactNode }) {
   } = useForm<RentFormState>({
     defaultValues: defaultFormValues,
     resolver: zodResolver(rentFormValidator),
+  });
+
+  const { isLoading, mutate } = useMutation(createListing, {
+    onSuccess() {
+      toast.success("Listing created successfully!");
+      reset();
+      moveTo(minStep);
+      closeRentModal();
+    },
+    onError(error: any) {
+      handleError(error);
+    },
   });
 
   const customSetValue: UseFormSetValue<RentFormState> = useCallback(
@@ -129,7 +155,19 @@ export default function Provider({ children }: { children: React.ReactNode }) {
   }
 
   const onSubmit: SubmitHandler<RentFormState> = (data) => {
-    console.log(data);
+    const input: CreateListingReq = {
+      bathroom_cnt: data.bathroomCount,
+      category: data.category,
+      description: data.description,
+      price: Number(data.price),
+      title: data.title,
+      guest_cnt: data.guestCount,
+      location_value: data.location as string,
+      room_cnt: data.roomCount,
+      thumbnail: data.imageSrc,
+    };
+
+    mutate(input);
   };
 
   async function checkStepValid(step: RentSteps): Promise<boolean> {
@@ -170,6 +208,7 @@ export default function Provider({ children }: { children: React.ReactNode }) {
           watch,
           onSubmit: handleSubmitRentForm,
         },
+        isSubmitting: isLoading,
       }}
     >
       {children}

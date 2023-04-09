@@ -4,12 +4,14 @@ import { useRentStore } from "@/app/zustand/rentStore";
 import { FC, useMemo } from "react";
 import Modal from "../../common/modal/Modal";
 import CategoryStep from "./steps/CategoryStep";
-import { RentSteps, useRentContext } from "./controller";
+import { RentFormState, RentSteps, useRentContext } from "./controller";
 import LocationStep from "./steps/LocationStep";
 import InfoStep from "./steps/InfoStep";
 import ImagesStep from "./steps/ImagesStep";
 import DescriptionStep from "./steps/DescriptionStep";
 import PriceStep from "./steps/PriceStep";
+import { FieldPath } from "react-hook-form";
+import ErrorMessage from "../../common/ErrorMessage";
 
 interface RentModalProps {}
 
@@ -35,6 +37,15 @@ const RentModal: FC<RentModalProps> = ({}) => {
     return "Back";
   }, [isFirstStep]);
 
+  function getError() {
+    if (!Object.keys(formController.errors)) return null;
+    const errorKey = Object.keys(
+      formController.errors
+    )[0] as FieldPath<RentFormState>;
+
+    return formController.errors[errorKey]?.message;
+  }
+
   const renderStep = () => {
     switch (currentStep) {
       case RentSteps.CATEGORY:
@@ -53,7 +64,7 @@ const RentModal: FC<RentModalProps> = ({}) => {
         return <DescriptionStep />;
 
       case RentSteps.PRICE:
-         return <PriceStep/>
+        return <PriceStep />;
 
       default:
         return <></>;
@@ -71,6 +82,11 @@ const RentModal: FC<RentModalProps> = ({}) => {
       secondaryAction={isFirstStep ? undefined : moveBackward}
     >
       {renderStep()}
+      {getError() && (
+        <div className="mt-4">
+          <ErrorMessage center message={getError() as string} />
+        </div>
+      )}
     </Modal>
   );
 };
